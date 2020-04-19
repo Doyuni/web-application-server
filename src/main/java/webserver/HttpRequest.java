@@ -17,18 +17,17 @@ public class HttpRequest {
 
     private static final Logger log = LoggerFactory.getLogger("HttpRequest.class");
 
-    private String url;
-    private String method;
-
     private Map<String, String> headers = new HashMap<>();
     private Map<String, String> params = new HashMap<>();
+    private RequestLine requestLine;
 
     public HttpRequest(InputStream in) {
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-            String requestLine = br.readLine();
-            if(requestLine == null) return;
-            processRequestLine(requestLine);
+            String line = br.readLine();
+            if(line == null) return;
+
+            requestLine = new RequestLine(line);
 
             String header = br.readLine();
             while(!"".equals(header)) {
@@ -36,45 +35,28 @@ public class HttpRequest {
                 String[] tokens = header.split(":");
                 headers.put(tokens[0].trim(), tokens[1].trim());
                 header = br.readLine();
-                if(header == null) return;
+                if(header == null) break;
             }
 
-            if ("POST".equals(method)) {
+            if (getMethod().isPost()) {
                 String requestBody = IOUtils.readData(br, Integer.parseInt(headers.get("Content-Length")));
                 log.debug("Request Body: {}", requestBody);
                 params = HttpRequestUtils.parseQueryString(requestBody);
+            } else {
+                params = requestLine.getParams();
             }
-
         } catch (IOException e) {
             log.error(e.getMessage());
         }
 
     }
 
-    public void processRequestLine(String requestLine) {
-        log.debug("Request Line:{}", requestLine);
-        String[] tokens = requestLine.split(" ");
-        method = tokens[0];
-
-        if (method.equals("POST")) {
-            url = tokens[1];
-            return;
-        }
-        int index = tokens[1].indexOf("?");
-        if (index == -1) {
-            url = tokens[1];
-        } else {
-            url = tokens[1].substring(0, index);
-            params = HttpRequestUtils.parseQueryString(tokens[1].substring(index+1));
-        }
-    }
-
-    public String getMethod() {
-        return method;
+    public HttpMethod getMethod() {
+        return requestLine.getMethod();
     }
 
     public String getURL() {
-        return url;
+        return requestLine.getURL();
     }
 
     public String getHeader(String key){

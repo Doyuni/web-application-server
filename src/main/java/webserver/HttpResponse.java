@@ -14,11 +14,10 @@ import java.util.Set;
 
 public class HttpResponse {
 
-    private Logger log = LoggerFactory.getLogger(HttpResponse.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
 
     private DataOutputStream dos = null;
-
-    Map<String, String> headers = new HashMap<String, String>();
+    private Map<String, String> headers = new HashMap<String, String>();
 
     public HttpResponse(OutputStream out) {
         dos = new DataOutputStream(out);
