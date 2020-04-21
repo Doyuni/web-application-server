@@ -2,23 +2,27 @@ package controller;
 
 import db.DataBase;
 import model.User;
-import webserver.HttpRequest;
-import webserver.HttpResponse;
+import http.HttpRequest;
+import http.HttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
         User user = DataBase.findUserById(request.getParameter("userId"));
-        if (user == null) {
-            response.forward("/user/login_failed.html");
-            return;
-        }
-        if (user.getPassword().equals(request.getParameter("password"))) {
-            response.addHeader("Set-Cookie", "logined=true");
-            response.sendRedirect("/index.html");
+        log.debug("User: {}", user.toString());
+        if (user != null) {
+            if (user.getPassword().equals(request.getParameter("password"))) {
+                response.addHeader("Set-Cookie", "logined=true");
+                response.sendRedirect("/index.html");
+            } else {
+                response.sendRedirect("/user/login_failed.html");
+            }
         } else {
-            response.forward("/user/login_failed.html");
+            response.sendRedirect("/user/login_failed.html");
         }
     }
 }

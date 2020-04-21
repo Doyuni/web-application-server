@@ -2,10 +2,12 @@ package controller;
 
 import db.DataBase;
 import model.User;
-import webserver.HttpRequest;
-import webserver.HttpResponse;
+import http.HttpRequest;
+import http.HttpResponse;
+import util.HttpRequestUtils;
 
 import java.util.Collection;
+import java.util.Map;
 
 public class ListUserController extends AbstractController{
     @Override
@@ -30,10 +32,12 @@ public class ListUserController extends AbstractController{
         response.responseBody(body);
     }
 
-    public boolean isLogin(String fieldValue) {
-        if (fieldValue == null) {
+    public boolean isLogin(String cookieValue) {
+        Map<String, String> cookies = HttpRequestUtils.parseCookies(cookieValue);
+        String value = cookies.get("logined");
+        if (value == null) {
             return false;
         }
-        return Boolean.parseBoolean(fieldValue);
+        return Boolean.parseBoolean(value);
     }
 }
