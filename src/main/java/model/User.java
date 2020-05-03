@@ -13,6 +13,11 @@ public class User {
         this.email = email;
     }
 
+    public boolean login(String password) {
+        if (password == null) return false;
+        return password.equals(this.password);
+    }
+
     public String getUserId() {
         return userId;
     }
